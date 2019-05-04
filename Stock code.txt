@@ -1,0 +1,44 @@
+Sub stock()
+
+  Dim data As Variant
+  Dim i As Long
+  Dim countDict As Variant
+  Dim ticker As Variant
+  Dim volume As Variant
+
+  Set countDict = CreateObject("Scripting.Dictionary")
+
+  data = ActiveSheet.UsedRange 'data is in columns A and G
+
+  'Populate the dictionary: key = category / Item = count
+  For i = LBound(data, 1) To UBound(data, 1)
+    ticker = data(i, 1)
+    volume = data(i, 7)
+    If countDict.exists(ticker) Then
+      countDict(ticker) = countDict(ticker) + volume 'if we have already seen that category, add to the total
+    Else
+      countDict(ticker) = volume 'first time we find that category, create it
+    End If
+  Next i
+
+  'Copy dictionary into an array
+  ReDim data(1 To countDict.Count, 1 To 2) As Variant
+
+  Dim d As Variant
+  i = 1
+  For Each d In countDict
+    data(i, 1) = d
+    data(i, 2) = countDict(d)
+    i = i + 1
+  Next d
+
+  'Puts the result back in the sheet in column I and J, including headers
+  With ActiveSheet
+    .Range("I1").Resize(UBound(data, 1), UBound(data, 2)) = data
+    Range("I1").Value = "Ticker"
+    Range("J1").Value = "Total Volume"
+    
+  End With
+
+End Sub
+
